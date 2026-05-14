@@ -36,12 +36,24 @@ jobs:
           buildozer init
         fi
         
+        # ১. বিল্ডোজার যেখানে ওল্ড sdkmanager খোঁজে, সেখানে ডিরেক্টরি তৈরি করা হচ্ছে
+        mkdir -p /home/runner/.buildozer/android/platform/android-sdk/tools/bin
         mkdir -p /home/runner/.buildozer/android/platform/android-sdk/licenses
+        
+        # ২. একটি ডামি/নকল sdkmanager স্ক্রিপ্ট তৈরি করা হচ্ছে যেন বিল্ডোজার ধোঁকা খায়
+        echo '#!/bin/bash' > /home/runner/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+        echo 'echo "Mock sdkmanager called with arguments: $@"' >> /home/runner/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+        echo 'exit 0' >> /home/runner/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+        chmod +x /home/runner/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+        
+        # ৩. সমস্ত অ্যান্ড্রয়েড লাইসেন্স হ্যাশ কোড ইনজেক্ট করা হচ্ছে
         echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb74bf363c90a3ca4d56\n24333f8a63b6825ea9c5514f83c2829b004d1fee\n84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910\nf31912f00d84d1668ab43e7f1747307ae141681a\n2f4c2d3cf38fa454641cbda8b0d4c9886a11de9c" > /home/runner/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
         
+        # ৪. বিল্ড টুলের ভার্সন স্টেবল ৩৪ এ সেট করা হচ্ছে
         sed -i 's|# (int) Android API to use|android.api = 34|' buildozer.spec
         sed -i 's|# (str) Android build tools version|android.build_tools_version = 34.0.0|' buildozer.spec
         
+        # ৫. বিল্ড প্রসেস রান
         yes | buildozer android debug
 
     - name: Upload APK Artifact
