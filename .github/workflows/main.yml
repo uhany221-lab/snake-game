@@ -8,10 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
-    # Node 24 বাধ্যতামুলক করার জন্য এনভায়রনমেন্ট সেট করা হয়েছে
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -28,12 +24,14 @@ jobs:
         pip3 install --upgrade pip
         pip3 install buildozer cython virtualenv
 
-    # আগের বিল্ডের ক্যাশ ফাইলগুলো পরিষ্কার করার কমান্ড যুক্ত করা হয়েছে
-    - name: Clean Buildozer Cache
-      run: buildozer android clean
-
     - name: Build with Buildozer
       run: |
+        # যদি আপনার প্রজেক্টে buildozer.spec ফাইল না থাকে, তবে এটি স্বয়ংক্রিয়ভাবে একটি তৈরি করে নেবে
+        if [ ! -f buildozer.spec ]; then
+          buildozer init
+        fi
+        
+        # সরাসরি অ্যান্ড্রয়েড APK বিল্ড প্রসেস শুরু করা হচ্ছে
         buildozer android debug
       env:
         ACCEPT_SDK_LICENSE_NET: "y"
