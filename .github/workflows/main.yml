@@ -24,17 +24,26 @@ jobs:
         pip3 install --upgrade pip
         pip3 install buildozer cython virtualenv
 
+    # বিল্ডোজার রান করার আগে অ্যান্ড্রয়েড লাইসেন্স ডিরেক্টরি এবং ফাইল তৈরি করা হচ্ছে
+    - name: Auto Accept Android SDK Licenses
+      run: |
+        mkdir -p ~/.android
+        touch ~/.android/repositories.cfg
+        
+        # বিল্ডোজারের ডিফল্ট এসডিকে পাথে লাইসেন্স ফাইল তৈরি
+        mkdir -p /home/runner/.buildozer/android/platform/android-sdk/licenses
+        
+        # বর্তমান সব অ্যান্ড্রয়েড লাইসেন্স হ্যাশ কোড স্বয়ংক্রিয়ভাবে ইনজেক্ট করা হচ্ছে
+        echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb74bf363c90a3ca4d56\n24333f8a63b6825ea9c5514f83c2829b004d1fee\n84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910\nf31912f00d84d1668ab43e7f1747307ae141681a" > /home/runner/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+
     - name: Build with Buildozer
       run: |
-        # যদি আপনার প্রজেক্টে buildozer.spec ফাইল না থাকে, তবে এটি স্বয়ংক্রিয়ভাবে একটি তৈরি করে নেবে
         if [ ! -f buildozer.spec ]; then
           buildozer init
         fi
         
-        # সরাসরি অ্যান্ড্রয়েড APK বিল্ড প্রসেস শুরু করা হচ্ছে
-        buildozer android debug
-      env:
-        ACCEPT_SDK_LICENSE_NET: "y"
+        # নন-ইন্টারেক্টিভ মোডে বিল্ড রান করা হচ্ছে যেন কোনো ইনপুট না চায়
+        yes | buildozer android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
