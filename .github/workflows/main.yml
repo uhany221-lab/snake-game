@@ -3,22 +3,27 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.9'
 
-    - name: Install Dependencies
+    - name: Install System Dependencies
       run: |
         sudo apt update
-        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-        pip install --upgrade pip setuptools cython buildozer
+        sudo apt install -y git zip unzip openjdk-11-jdk autoconf libtool pkg-config libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev bzip2 dirmngr
 
-    - name: Build Android APK with Buildozer
+    - name: Install Python Tools
+      run: |
+        pip install --upgrade pip
+        pip install cython==0.29.33 setuptools sh
+        pip install buildozer==1.5.0
+
+    - name: Build with Buildozer
       run: |
         export FORCE_BUILD_FOR_ROOT=1
         buildozer android debug
@@ -26,6 +31,6 @@ jobs:
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: game-apk
+        name: MyGame-APK
         path: bin/*.apk
         
